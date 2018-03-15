@@ -27,7 +27,7 @@
                     <StackPanel>
                         <TextBlock Text="{Binding CreationTime}"/>
                         <TextBlock Text="{Binding Sender}"/>
-                        <TextBlock Text="{Binding Level}"/>
+                        <TextBlock Text="{Binding Level}"> Level</TextBlock>
                         <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </DataTemplate>

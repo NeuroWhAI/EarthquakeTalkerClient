@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace EarthquakeTalkerClient
 {
@@ -24,8 +25,14 @@ namespace EarthquakeTalkerClient
         {
             InitializeComponent();
 
+
             this.ViewModel = new MainWindowVM();
             this.DataContext = this.ViewModel;
+
+
+            m_timer.Interval = TimeSpan.FromMilliseconds(2_000);
+            m_timer.Tick += Timer_Tick;
+            m_timer.Start();
         }
 
         //################################################################################################
@@ -33,11 +40,24 @@ namespace EarthquakeTalkerClient
         private MainWindowVM ViewModel
         { get; set; } = null;
 
+        private DispatcherTimer m_timer = new DispatcherTimer();
+
         //################################################################################################
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            m_timer.Stop();
+
             this.ViewModel.WhenWindowClosing();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            if (this.listMessage.Items.Count > 0)
+            {
+                this.listMessage.SelectedIndex = this.listMessage.Items.Count - 1;
+                this.listMessage.ScrollIntoView(this.listMessage.SelectedItem);
+            }
         }
     }
 }

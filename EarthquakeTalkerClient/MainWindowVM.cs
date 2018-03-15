@@ -76,9 +76,15 @@ namespace EarthquakeTalkerClient
 
         private void Client_MessageReceived(Message msg)
         {
-            this.State = "연결됨 " + DateTime.Now.ToShortTimeString();
+            this.State = "연결됨 " + DateTime.Now.ToLongTimeString();
 
             this.Messages.Add(msg);
+
+            if (this.Messages.Count > 32)
+            {
+                this.Messages.RemoveAt(0);
+            }
+
             NotifyPropertyChanged("Messages");
         }
     }

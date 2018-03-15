@@ -9,6 +9,10 @@
     <Window.DataContext>
         <local:MainWindowVM/>
     </Window.DataContext>
+    <Window.Resources>
+        <local:MessageLevelConverter x:Key="LevelConverter"/>
+        <local:MessageBorderConverter x:Key="BorderConverter"/>
+    </Window.Resources>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem>
@@ -24,12 +28,17 @@
             </ListBox.Resources>
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding CreationTime}"/>
-                        <TextBlock Text="{Binding Sender}"/>
-                        <TextBlock Text="{Binding Level}"> Level</TextBlock>
-                        <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
-                    </StackPanel>
+                    <Border Background="GhostWhite" BorderBrush="{Binding Level, Mode=OneWay, Converter={StaticResource BorderConverter}}" BorderThickness="2" Margin="4" Padding="8" CornerRadius="8">
+                        <StackPanel>
+                            <TextBlock Text="{Binding CreationTime, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"/>
+                            <TextBlock Text="{Binding Sender}"/>
+                            <TextBlock Text="{Binding Level, Mode=OneWay, Converter={StaticResource LevelConverter}}"/>
+                            <Grid Margin="4">
+                                <Image Source="{Binding Text}"/>
+                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

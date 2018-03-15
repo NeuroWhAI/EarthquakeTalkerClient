@@ -46,12 +46,19 @@ namespace EarthquakeTalkerClient
 
         private void DoJob()
         {
+            int startOffset = 3;
+
             while (m_onRunning)
             {
                 try
                 {
-                    StartProtocol();
-                    break;
+                    StartProtocol(startOffset);
+
+                    startOffset -= 1;
+                    if (startOffset < 0)
+                    {
+                        break;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -82,7 +89,7 @@ namespace EarthquakeTalkerClient
             }
         }
 
-        private void StartProtocol()
+        private void StartProtocol(int offset)
         {
             using (var client = new TcpClient(this.Host, this.Port))
             using (var stream = client.GetStream())
@@ -90,7 +97,7 @@ namespace EarthquakeTalkerClient
                 SendString(stream, "neurowhai");
 
                 SendString(stream, "recent");
-                SendString(stream, "0");
+                SendString(stream, offset.ToString());
 
                 if (ReadStringFromStream(stream) == "msg")
                 {

@@ -1,1 +1,1 @@
-EarthquakeTalkerClient
+# Earthquake Talker Client

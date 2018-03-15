@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("EarthquakeTalkerClient")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("NeuroWhAI")]
 [assembly: AssemblyProduct("EarthquakeTalkerClient")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCopyright("Copyright © NeuroWhAI 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

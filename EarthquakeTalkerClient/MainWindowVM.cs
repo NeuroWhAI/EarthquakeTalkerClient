@@ -61,6 +61,18 @@ namespace EarthquakeTalkerClient
             }
         }
 
+        private string m_stateMessage2 = "Loading";
+        public string State2
+        {
+            get { return m_stateMessage2; }
+            set
+            {
+                m_stateMessage2 = value;
+
+                NotifyPropertyChanged("State2");
+            }
+        }
+
         private Client m_client = null;
 
         //################################################################################################
@@ -77,7 +89,8 @@ namespace EarthquakeTalkerClient
 
         private void Client_MessageReceived(Message msg)
         {
-            this.State = "연결됨 " + DateTime.Now.ToLongTimeString();
+            this.State = "연결됨";
+            this.State2 = "최근 수신 시간 : " + DateTime.Now.ToLongTimeString();
 
             this.Messages.Add(msg);
 

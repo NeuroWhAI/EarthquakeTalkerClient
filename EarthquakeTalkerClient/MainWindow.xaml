@@ -18,6 +18,9 @@
             <StatusBarItem>
                 <TextBlock x:Name="labelState" Text="{Binding State}"/>
             </StatusBarItem>
+            <StatusBarItem Margin="32 0 0 0">
+                <TextBlock x:Name="labelState2" Text="{Binding State2}"/>
+            </StatusBarItem>
         </StatusBar>
         <ListBox x:Name="listMessage" ItemsSource="{Binding Messages}">
             <ListBox.Resources>

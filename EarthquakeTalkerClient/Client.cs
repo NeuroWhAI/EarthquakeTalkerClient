@@ -18,6 +18,7 @@ namespace EarthquakeTalkerClient
 
         //################################################################################################
 
+        public event Action ProtocolSucceeded;
         public event Action<Message> MessageReceived;
         public event Action ProtocolFailed;
 
@@ -104,7 +105,12 @@ namespace EarthquakeTalkerClient
                     var msg = ReadMessageFromStream(stream);
                     m_latestGuid = msg.Id;
 
+                    ProtocolSucceeded?.Invoke();
                     MessageReceived?.Invoke(msg);
+                }
+                else
+                {
+                    ProtocolSucceeded?.Invoke();
                 }
             }
         }
@@ -124,7 +130,12 @@ namespace EarthquakeTalkerClient
                     var msg = ReadMessageFromStream(stream);
                     m_latestGuid = msg.Id;
 
+                    ProtocolSucceeded?.Invoke();
                     MessageReceived?.Invoke(msg);
+                }
+                else
+                {
+                    ProtocolSucceeded?.Invoke();
                 }
             }
         }

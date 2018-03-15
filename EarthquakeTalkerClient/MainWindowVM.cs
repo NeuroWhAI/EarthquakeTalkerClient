@@ -28,6 +28,7 @@ namespace EarthquakeTalkerClient
 
                 m_client.MessageReceived += Client_MessageReceived;
                 m_client.ProtocolFailed += Client_ProtocolFailed;
+                m_client.ProtocolSucceeded += Client_ProtocolSucceeded;
 
                 m_client.Start();
             }
@@ -86,6 +87,11 @@ namespace EarthquakeTalkerClient
             }
 
             NotifyPropertyChanged("Messages");
+        }
+
+        private void Client_ProtocolSucceeded()
+        {
+            this.State = "연결됨";
         }
     }
 }

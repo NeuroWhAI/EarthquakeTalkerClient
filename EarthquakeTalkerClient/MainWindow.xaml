@@ -22,7 +22,7 @@
                 <TextBlock x:Name="labelState2" Text="{Binding State2}"/>
             </StatusBarItem>
         </StatusBar>
-        <ListBox x:Name="listMessage" ItemsSource="{Binding Messages}">
+        <ListBox x:Name="listMessage" ItemsSource="{Binding Messages}" ScrollViewer.CanContentScroll="False">
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Focusable" Value="False"/>

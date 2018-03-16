@@ -25,6 +25,7 @@
         <ListBox x:Name="listMessage" ItemsSource="{Binding Messages}">
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem">
+                    <Setter Property="Focusable" Value="False"/>
                     <Setter Property="Width"
                             Value="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ScrollContentPresenter}, Path=ActualWidth}"/>
                 </Style>

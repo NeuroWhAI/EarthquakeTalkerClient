@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Data;
 
 namespace EarthquakeTalkerClient
 {
@@ -13,6 +14,11 @@ namespace EarthquakeTalkerClient
     {
         public MainWindowVM()
         {
+            BindingOperations.EnableCollectionSynchronization(this.Messages, m_lockMsgList);
+
+            this.Messages.CollectionChanged += (s, e) => NotifyPropertyChanged("Messages");
+
+
             try
             {
                 string host, ip;
@@ -46,8 +52,17 @@ namespace EarthquakeTalkerClient
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        public List<Message> Messages
-        { get; set; } = new List<Message>();
+        private ObservableCollection<Message> m_msgList = new ObservableCollection<Message>();
+        public ObservableCollection<Message> Messages
+        {
+            get { return m_msgList; }
+            set
+            {
+                m_msgList = value;
+                NotifyPropertyChanged("Messages");
+            }
+        }
+        private readonly object m_lockMsgList = new object();
 
         private string m_stateMessage = "Loading";
         public string State
@@ -92,14 +107,15 @@ namespace EarthquakeTalkerClient
             this.State = "연결됨";
             this.State2 = "최근 수신 시간 : " + DateTime.Now.ToLongTimeString();
 
-            this.Messages.Add(msg);
-
-            if (this.Messages.Count > 32)
+            lock (m_lockMsgList)
             {
-                this.Messages.RemoveAt(0);
-            }
+                this.Messages.Add(msg);
 
-            NotifyPropertyChanged("Messages");
+                if (this.Messages.Count > 32)
+                {
+                    this.Messages.RemoveAt(0);
+                }
+            }
         }
 
         private void Client_ProtocolSucceeded()

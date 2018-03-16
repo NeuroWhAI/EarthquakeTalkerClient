@@ -19,7 +19,7 @@ namespace EarthquakeTalkerClient
         //################################################################################################
 
         public event Action ProtocolSucceeded;
-        public event Action<Message> MessageReceived;
+        public event Action<Message, bool> MessageReceived;
         public event Action ProtocolFailed;
 
         public string Host
@@ -106,7 +106,7 @@ namespace EarthquakeTalkerClient
                     m_latestGuid = msg.Id;
 
                     ProtocolSucceeded?.Invoke();
-                    MessageReceived?.Invoke(msg);
+                    MessageReceived?.Invoke(msg, false);
                 }
                 else
                 {
@@ -131,7 +131,7 @@ namespace EarthquakeTalkerClient
                     m_latestGuid = msg.Id;
 
                     ProtocolSucceeded?.Invoke();
-                    MessageReceived?.Invoke(msg);
+                    MessageReceived?.Invoke(msg, true);
                 }
                 else
                 {

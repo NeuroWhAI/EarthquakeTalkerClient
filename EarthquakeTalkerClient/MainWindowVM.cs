@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
+using System.Media;
 
 namespace EarthquakeTalkerClient
 {
@@ -102,7 +103,7 @@ namespace EarthquakeTalkerClient
             this.State = "연결 중";
         }
 
-        private void Client_MessageReceived(Message msg)
+        private void Client_MessageReceived(Message msg, bool isNew)
         {
             this.State = "연결됨";
             this.State2 = "최근 수신 시간 : " + DateTime.Now.ToLongTimeString();
@@ -116,11 +117,34 @@ namespace EarthquakeTalkerClient
                     this.Messages.RemoveAt(0);
                 }
             }
+
+
+            if (isNew)
+            {
+                if (msg.Level <= Message.Priority.Normal)
+                {
+                    PlayNormalAlarm();
+                }
+                else
+                {
+                    PlayCriticalAlarm();
+                }
+            }
         }
 
         private void Client_ProtocolSucceeded()
         {
             this.State = "연결됨";
+        }
+
+        private void PlayNormalAlarm()
+        {
+            SystemSounds.Beep.Play();
+        }
+
+        private void PlayCriticalAlarm()
+        {
+            SystemSounds.Asterisk.Play();
         }
     }
 }

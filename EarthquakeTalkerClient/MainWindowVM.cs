@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
-using System.Media;
+using System.Windows.Media;
 
 namespace EarthquakeTalkerClient
 {
@@ -43,6 +43,10 @@ namespace EarthquakeTalkerClient
             {
                 this.State = "서버 정보를 읽을 수 없습니다.";
             }
+
+
+            m_mediaNormal.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "normal.mp3")));
+            m_mediaHigh.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "high.mp3")));
         }
 
         //################################################################################################
@@ -91,6 +95,9 @@ namespace EarthquakeTalkerClient
 
         private Client m_client = null;
 
+        private MediaPlayer m_mediaNormal = new MediaPlayer();
+        private MediaPlayer m_mediaHigh = new MediaPlayer();
+
         //################################################################################################
 
         public void WhenWindowClosing()
@@ -127,7 +134,7 @@ namespace EarthquakeTalkerClient
                 }
                 else
                 {
-                    PlayCriticalAlarm();
+                    PlayHighAlarm();
                 }
             }
         }
@@ -139,12 +146,21 @@ namespace EarthquakeTalkerClient
 
         private void PlayNormalAlarm()
         {
-            SystemSounds.Beep.Play();
+            PlayAlarm(m_mediaNormal);
         }
 
-        private void PlayCriticalAlarm()
+        private void PlayHighAlarm()
         {
-            SystemSounds.Asterisk.Play();
+            PlayAlarm(m_mediaHigh);
+        }
+
+        private void PlayAlarm(MediaPlayer player)
+        {
+            player.Dispatcher.Invoke(() =>
+            {
+                player.Stop();
+                player.Play();
+            });
         }
     }
 }

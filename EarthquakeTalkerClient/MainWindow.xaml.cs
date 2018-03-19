@@ -25,9 +25,8 @@ namespace EarthquakeTalkerClient
         {
             InitializeComponent();
 
-
-            this.ViewModel = new MainWindowVM();
-            this.DataContext = this.ViewModel;
+            
+            this.ViewModel = this.DataContext as MainWindowVM;
 
 
             m_timer.Interval = TimeSpan.FromMilliseconds(2_000);

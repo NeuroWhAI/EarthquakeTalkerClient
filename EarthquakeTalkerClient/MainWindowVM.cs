@@ -47,6 +47,7 @@ namespace EarthquakeTalkerClient
 
             m_mediaNormal.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "normal.mp3")));
             m_mediaHigh.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "high.mp3")));
+            m_mediaCritical.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "critical.mp3")));
         }
 
         //################################################################################################
@@ -97,6 +98,7 @@ namespace EarthquakeTalkerClient
 
         private MediaPlayer m_mediaNormal = new MediaPlayer();
         private MediaPlayer m_mediaHigh = new MediaPlayer();
+        private MediaPlayer m_mediaCritical = new MediaPlayer();
 
         //################################################################################################
 
@@ -128,13 +130,17 @@ namespace EarthquakeTalkerClient
 
             if (isNew)
             {
-                if (msg.Level <= Message.Priority.Normal)
+                if (msg.Level == Message.Priority.Normal)
                 {
                     PlayNormalAlarm();
                 }
-                else
+                else if (msg.Level == Message.Priority.High)
                 {
                     PlayHighAlarm();
+                }
+                else if (msg.Level >= Message.Priority.Critical)
+                {
+                    PlayCriticalAlarm();
                 }
             }
         }
@@ -152,6 +158,11 @@ namespace EarthquakeTalkerClient
         private void PlayHighAlarm()
         {
             PlayAlarm(m_mediaHigh);
+        }
+
+        private void PlayCriticalAlarm()
+        {
+            PlayAlarm(m_mediaCritical);
         }
 
         private void PlayAlarm(MediaPlayer player)

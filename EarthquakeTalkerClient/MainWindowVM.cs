@@ -22,16 +22,16 @@ namespace EarthquakeTalkerClient
 
             try
             {
-                string host, ip;
+                string host, port;
 
                 using (var sr = new StreamReader("server.txt"))
                 {
                     host = sr.ReadLine();
-                    ip = sr.ReadLine();
+                    port = sr.ReadLine();
                 }
 
 
-                m_client = new Client(host, int.Parse(ip));
+                m_client = new Client(host, int.Parse(port));
 
                 m_client.MessageReceived += Client_MessageReceived;
                 m_client.ProtocolFailed += Client_ProtocolFailed;

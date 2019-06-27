@@ -45,9 +45,38 @@ namespace EarthquakeTalkerClient
             }
 
 
-            m_mediaNormal.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "normal.mp3")));
-            m_mediaHigh.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "high.mp3")));
-            m_mediaCritical.Open(new Uri(Path.Combine(Directory.GetCurrentDirectory(), "critical.mp3")));
+            try
+            {
+                using (var sr = new StreamReader("keywords.txt"))
+                {
+                    string currentTarget = string.Empty;
+
+                    while (!sr.EndOfStream)
+                    {
+                        string text = sr.ReadLine();
+
+                        if (text.Length >= 2 && text[0] == '$')
+                        {
+                            currentTarget = text.Substring(1);
+
+                            var alarm = new MediaPlayer();
+                            alarm.Open(new Uri(Path.Combine("Alarms", currentTarget), UriKind.Relative));
+
+                            m_alarms[currentTarget] = alarm;
+                        }
+                        else if (text.Length > 0 && !string.IsNullOrEmpty(currentTarget))
+                        {
+                            m_keywords.Add(text, currentTarget);
+                        }
+                    }
+
+                    sr.Close();
+                }
+            }
+            catch (Exception)
+            {
+                this.State = "키워드 설정을 읽을 수 없습니다.";
+            }
         }
 
         //################################################################################################
@@ -96,9 +125,8 @@ namespace EarthquakeTalkerClient
 
         private Client m_client = null;
 
-        private MediaPlayer m_mediaNormal = new MediaPlayer();
-        private MediaPlayer m_mediaHigh = new MediaPlayer();
-        private MediaPlayer m_mediaCritical = new MediaPlayer();
+        private Dictionary<string, string> m_keywords = new Dictionary<string, string>();
+        private Dictionary<string, MediaPlayer> m_alarms = new Dictionary<string, MediaPlayer>();
 
         //################################################################################################
 
@@ -130,17 +158,33 @@ namespace EarthquakeTalkerClient
 
             if (isNew)
             {
-                if (msg.Level == Message.Priority.Normal)
+                var sources = new[]
                 {
-                    PlayNormalAlarm();
+                    msg.Text,
+                    msg.Sender,
+                    msg.Level.ToString() + " Level",
+                };
+
+                string finalAlarm = string.Empty;
+
+                foreach (string src in sources)
+                {
+                    foreach (var kv in m_keywords)
+                    {
+                        string keyword = kv.Key;
+                        string alarm = kv.Value;
+
+                        if (src.Contains(keyword))
+                        {
+                            finalAlarm = alarm;
+                        }
+                    }
                 }
-                else if (msg.Level == Message.Priority.High)
+
+                if (!string.IsNullOrEmpty(finalAlarm)
+                    && m_alarms.ContainsKey(finalAlarm))
                 {
-                    PlayHighAlarm();
-                }
-                else if (msg.Level >= Message.Priority.Critical)
-                {
-                    PlayCriticalAlarm();
+                    PlayAlarm(m_alarms[finalAlarm]);
                 }
             }
         }
@@ -148,21 +192,6 @@ namespace EarthquakeTalkerClient
         private void Client_ProtocolSucceeded()
         {
             this.State = "연결됨";
-        }
-
-        private void PlayNormalAlarm()
-        {
-            PlayAlarm(m_mediaNormal);
-        }
-
-        private void PlayHighAlarm()
-        {
-            PlayAlarm(m_mediaHigh);
-        }
-
-        private void PlayCriticalAlarm()
-        {
-            PlayAlarm(m_mediaCritical);
         }
 
         private void PlayAlarm(MediaPlayer player)

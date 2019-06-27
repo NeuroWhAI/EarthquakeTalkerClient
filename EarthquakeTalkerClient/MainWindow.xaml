@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EarthquakeTalkerClient"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Earthquake Talker Client" Height="350" Width="525" Closing="Window_Closing">
     <Window.DataContext>
@@ -12,6 +13,8 @@
     <Window.Resources>
         <local:MessageLevelConverter x:Key="LevelConverter"/>
         <local:MessageBorderConverter x:Key="BorderConverter"/>
+        <local:MessageTextVisibilityConverter x:Key="TextVisibilityConverter"/>
+        <local:MessageTextToImageConverter x:Key="TextToImageConverter"/>
     </Window.Resources>
     <DockPanel>
         <StatusBar DockPanel.Dock="Bottom">
@@ -38,8 +41,26 @@
                             <TextBlock Text="{Binding Sender}"/>
                             <TextBlock Text="{Binding Level, Mode=OneWay, Converter={StaticResource LevelConverter}}"/>
                             <Grid Margin="4">
-                                <Image Source="{Binding Text}"/>
-                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
+                                <Image Source="{Binding Text, Converter={StaticResource TextToImageConverter}}">
+                                    <Image.Visibility>
+                                        <Binding Path="Text"
+                                                 Converter="{StaticResource TextVisibilityConverter}">
+                                            <Binding.ConverterParameter>
+                                                <sys:Boolean>True</sys:Boolean>
+                                            </Binding.ConverterParameter>
+                                        </Binding>
+                                    </Image.Visibility>
+                                </Image>
+                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap">
+                                    <TextBlock.Visibility>
+                                        <Binding Path="Text"
+                                                 Converter="{StaticResource TextVisibilityConverter}">
+                                            <Binding.ConverterParameter>
+                                                <sys:Boolean>False</sys:Boolean>
+                                            </Binding.ConverterParameter>
+                                        </Binding>
+                                    </TextBlock.Visibility>
+                                </TextBlock>
                             </Grid>
                         </StackPanel>
                     </Border>

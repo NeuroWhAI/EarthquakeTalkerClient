@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.IO;
 
 namespace EarthquakeTalkerClient
 {
@@ -105,6 +106,11 @@ namespace EarthquakeTalkerClient
                     var msg = ReadMessageFromStream(stream);
                     m_latestGuid = msg.Id;
 
+                    if (CheckGlob(msg))
+                    {
+                        RequestGlob(msg.Text);
+                    }
+
                     ProtocolSucceeded?.Invoke();
                     MessageReceived?.Invoke(msg, false);
                 }
@@ -129,6 +135,11 @@ namespace EarthquakeTalkerClient
                 {
                     var msg = ReadMessageFromStream(stream);
                     m_latestGuid = msg.Id;
+
+                    if (CheckGlob(msg))
+                    {
+                        RequestGlob(msg.Text);
+                    }
 
                     ProtocolSucceeded?.Invoke();
                     MessageReceived?.Invoke(msg, true);
@@ -160,6 +171,79 @@ namespace EarthquakeTalkerClient
             return msg;
         }
 
+        private bool CheckGlob(Message msg)
+        {
+            string[] imageTypes =
+            {
+                ".png", ".jpg", ".bmp", ".jpeg", ".gif", // TODO: More...?
+            };
+
+            if (Util.CheckImageUri(msg.Text)
+                && !msg.Text.TrimStart().StartsWith("http"))
+            {
+                return !File.Exists(msg.Text);
+            }
+
+            return false;
+        }
+
+        private void RequestGlob(string path)
+        {
+            try
+            {
+                using (var client = new TcpClient(this.Host, this.Port))
+                using (var stream = client.GetStream())
+                {
+                    SendString(stream, "neurowhai");
+
+                    SendString(stream, "glob");
+                    SendString(stream, path);
+
+                    if (ReadStringFromStream(stream) == "glob")
+                    {
+                        SaveGlobFromStream(stream, path);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+            }
+        }
+
+        private void SaveGlobFromStream(NetworkStream stream, string path)
+        {
+            if (ReadStringFromStream(stream) != path)
+            {
+                throw new Exception("Path is invalid.");
+            }
+
+
+            int size = ReadIntFromStream(stream);
+
+            if (size <= 0)
+            {
+                throw new Exception(size + " is invalid.");
+            }
+
+
+            var buffer = new byte[size];
+
+            var task = stream.ReadAsync(buffer, 0, buffer.Length);
+            task.Wait(30_000);
+
+            if (task.IsCompleted == false || task.Result <= 0)
+            {
+                throw new Exception("Connection reset.");
+            }
+
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+
+            File.WriteAllBytes(path, buffer);
+        }
+
         private void SendString(NetworkStream stream, string str)
         {
             var strBuffer = Encoding.UTF8.GetBytes(str);
@@ -170,22 +254,24 @@ namespace EarthquakeTalkerClient
             stream.Write(strBuffer, 0, strBuffer.Length);
         }
 
-        private string ReadStringFromStream(NetworkStream stream)
+        private int ReadIntFromStream(NetworkStream stream)
         {
-            int num = 0;
             byte[] buffer = new byte[4];
-            Task<int> task = null;
 
-
-            task = stream.ReadAsync(buffer, 0, buffer.Length);
-            task.Wait(5_000);
+            var task = stream.ReadAsync(buffer, 0, buffer.Length);
+            task.Wait(8_000);
 
             if (task.IsCompleted == false || task.Result <= 0)
             {
                 throw new Exception("Connection reset.");
             }
 
-            num = BitConverter.ToInt32(buffer, 0);
+            return BitConverter.ToInt32(buffer, 0);
+        }
+
+        private string ReadStringFromStream(NetworkStream stream)
+        {
+            int num = ReadIntFromStream(stream);
 
             if (num <= 0 || num > 65535)
             {
@@ -193,10 +279,10 @@ namespace EarthquakeTalkerClient
             }
 
 
-            buffer = new byte[num];
+            var buffer = new byte[num];
 
 
-            task = stream.ReadAsync(buffer, 0, buffer.Length);
+            var task = stream.ReadAsync(buffer, 0, buffer.Length);
             task.Wait(10_000);
 
             if (task.IsCompleted == false || task.Result <= 0)

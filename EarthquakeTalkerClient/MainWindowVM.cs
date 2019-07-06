@@ -50,23 +50,35 @@ namespace EarthquakeTalkerClient
                 using (var sr = new StreamReader("keywords.txt"))
                 {
                     string currentTarget = string.Empty;
+                    List<string> currentKeywords = null;
 
                     while (!sr.EndOfStream)
                     {
                         string text = sr.ReadLine();
 
-                        if (text.Length >= 2 && text[0] == '$')
+                        if (text.Length < 2)
+                        {
+                            continue;
+                        }
+
+                        if (text[0] == '$')
                         {
                             currentTarget = text.Substring(1);
+
 
                             var alarm = new MediaPlayer();
                             alarm.Open(new Uri(Path.Combine("Alarms", currentTarget), UriKind.Relative));
 
                             m_alarms[currentTarget] = alarm;
+
+
+                            currentKeywords = new List<string>();
+
+                            m_keywords[currentTarget] = currentKeywords;
                         }
-                        else if (text.Length > 0 && !string.IsNullOrEmpty(currentTarget))
+                        else if (text[0] != '#' && currentKeywords != null)
                         {
-                            m_keywords.Add(text, currentTarget);
+                            currentKeywords.Add(text);
                         }
                     }
 
@@ -125,7 +137,7 @@ namespace EarthquakeTalkerClient
 
         private Client m_client = null;
 
-        private Dictionary<string, string> m_keywords = new Dictionary<string, string>();
+        private Dictionary<string, List<string>> m_keywords = new Dictionary<string, List<string>>();
         private Dictionary<string, MediaPlayer> m_alarms = new Dictionary<string, MediaPlayer>();
 
         //################################################################################################
@@ -158,26 +170,55 @@ namespace EarthquakeTalkerClient
 
             if (isNew)
             {
-                var sources = new[]
-                {
-                    msg.Text,
-                    msg.Sender,
-                    msg.Level.ToString() + " Level",
-                };
+                string source = $"{msg.Level} Level\n{msg.Sender}\n{msg.Text}";
 
                 string finalAlarm = string.Empty;
 
-                foreach (string src in sources)
+                foreach (var kv in m_keywords)
                 {
-                    foreach (var kv in m_keywords)
-                    {
-                        string keyword = kv.Key;
-                        string alarm = kv.Value;
+                    string alarm = kv.Key;
+                    var commandList = kv.Value;
 
-                        if (src.Contains(keyword))
+                    bool? triggered = null;
+
+                    foreach (string command in commandList)
+                    {
+                        char op = command[0];
+                        string keyword = command.Substring(1);
+
+                        bool srcHasKey = source.Contains(keyword);
+
+                        switch (op)
                         {
-                            finalAlarm = alarm;
+                            case '*':
+                                if (triggered.HasValue)
+                                    triggered &= srcHasKey;
+                                else
+                                    triggered = srcHasKey;
+                                break;
+
+                            case '+':
+                                if (triggered.HasValue)
+                                    triggered |= srcHasKey;
+                                else
+                                    triggered = srcHasKey;
+                                break;
+
+                            case '~':
+                                if (srcHasKey)
+                                    triggered = false;
+                                break;
+
+                            case '!':
+                                if (srcHasKey)
+                                    triggered = true;
+                                break;
                         }
+                    }
+
+                    if (triggered.HasValue && triggered.Value)
+                    {
+                        finalAlarm = alarm;
                     }
                 }
 

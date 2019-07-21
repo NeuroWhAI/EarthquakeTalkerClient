@@ -229,18 +229,9 @@ namespace EarthquakeTalkerClient
 
 
             var buffer = new byte[size];
-
-            var task = stream.ReadAsync(buffer, 0, buffer.Length);
-            task.Wait(30_000);
-
-            if (task.IsCompleted == false || task.Result <= 0)
-            {
-                throw new Exception("Connection reset.");
-            }
-
+            ReadBytes(stream, buffer, 0, buffer.Length);
 
             Directory.CreateDirectory(Path.GetDirectoryName(path));
-
             File.WriteAllBytes(path, buffer);
         }
 
@@ -258,13 +249,7 @@ namespace EarthquakeTalkerClient
         {
             byte[] buffer = new byte[4];
 
-            var task = stream.ReadAsync(buffer, 0, buffer.Length);
-            task.Wait(8_000);
-
-            if (task.IsCompleted == false || task.Result <= 0)
-            {
-                throw new Exception("Connection reset.");
-            }
+            ReadBytes(stream, buffer, 0, buffer.Length);
 
             return BitConverter.ToInt32(buffer, 0);
         }
@@ -282,15 +267,28 @@ namespace EarthquakeTalkerClient
             var buffer = new byte[num];
 
 
-            var task = stream.ReadAsync(buffer, 0, buffer.Length);
-            task.Wait(10_000);
-
-            if (task.IsCompleted == false || task.Result <= 0)
-            {
-                throw new Exception("Connection reset.");
-            }
+            ReadBytes(stream, buffer, 0, buffer.Length);
 
             return Encoding.UTF8.GetString(buffer);
+        }
+
+        private void ReadBytes(NetworkStream stream, byte[] buffer, int offset, int count)
+        {
+            const int CHUNK_SIZE = 1024;
+
+            while (count > 0)
+            {
+                var task = stream.ReadAsync(buffer, offset, Math.Min(count, CHUNK_SIZE));
+                task.Wait(10_000);
+
+                if (task.IsCompleted == false || task.Result <= 0)
+                {
+                    throw new Exception("Connection reset.");
+                }
+
+                offset += task.Result;
+                count -= task.Result;
+            }
         }
     }
 }

@@ -44,6 +44,11 @@ namespace EarthquakeTalkerClient
 
         //################################################################################################
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.ViewModel.Init();
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             m_timer.Stop();

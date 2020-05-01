@@ -16,75 +16,7 @@ namespace EarthquakeTalkerClient
     {
         public MainWindowVM()
         {
-            try
-            {
-                string host, port;
-
-                using (var sr = new StreamReader("server.txt"))
-                {
-                    host = sr.ReadLine();
-                    port = sr.ReadLine();
-                }
-
-
-                m_client = new Client(host, int.Parse(port));
-
-                m_client.MessageReceived += Client_MessageReceived;
-                m_client.ProtocolFailed += Client_ProtocolFailed;
-                m_client.ProtocolSucceeded += Client_ProtocolSucceeded;
-
-                m_client.Start();
-            }
-            catch (Exception)
-            {
-                this.State = "서버 정보를 읽을 수 없습니다.";
-            }
-
-
-            try
-            {
-                using (var sr = new StreamReader("keywords.txt"))
-                {
-                    string currentTarget = string.Empty;
-                    List<string> currentKeywords = null;
-
-                    while (!sr.EndOfStream)
-                    {
-                        string text = sr.ReadLine();
-
-                        if (text.Length < 2)
-                        {
-                            continue;
-                        }
-
-                        if (text[0] == '$')
-                        {
-                            currentTarget = text.Substring(1);
-
-
-                            var alarm = new MediaPlayer();
-                            alarm.Open(new Uri(Path.Combine("Alarms", currentTarget), UriKind.Relative));
-
-                            m_alarms[currentTarget] = alarm;
-
-
-                            currentKeywords = new List<string>();
-
-                            m_keywords[currentTarget] = currentKeywords;
-                        }
-                        else if (text[0] != '#' && currentKeywords != null)
-                        {
-                            currentKeywords.Add(text);
-                        }
-                    }
-
-                    sr.Close();
-                }
-            }
-            catch (Exception)
-            {
-                this.State = "키워드 설정을 읽을 수 없습니다.";
-            }
+            
         }
 
         //################################################################################################
@@ -138,6 +70,80 @@ namespace EarthquakeTalkerClient
         private Dictionary<string, MediaPlayer> m_alarms = new Dictionary<string, MediaPlayer>();
 
         //################################################################################################
+
+        public void Init()
+        {
+            try
+            {
+                string host, port;
+
+                using (var sr = new StreamReader("server.txt"))
+                {
+                    host = sr.ReadLine();
+                    port = sr.ReadLine();
+                }
+
+
+                m_client = new Client(host, int.Parse(port));
+
+                m_client.MessageReceived += Client_MessageReceived;
+                m_client.ProtocolFailed += Client_ProtocolFailed;
+                m_client.ProtocolSucceeded += Client_ProtocolSucceeded;
+
+                m_client.Start();
+            }
+            catch (Exception)
+            {
+                this.State = "서버 정보를 읽을 수 없습니다.";
+            }
+
+
+            try
+            {
+                using (var sr = new StreamReader("keywords.txt"))
+                {
+                    string currentTarget = string.Empty;
+                    List<string> currentKeywords = null;
+
+                    while (!sr.EndOfStream)
+                    {
+                        string text = sr.ReadLine();
+
+                        if (text.Length < 2)
+                        {
+                            continue;
+                        }
+
+                        if (text[0] == '$')
+                        {
+                            currentTarget = text.Substring(1);
+
+
+                            var alarm = new MediaPlayer();
+                            alarm.Open(new Uri(Path.Combine("Alarms", currentTarget), UriKind.Relative));
+                            alarm.Stop();
+
+                            m_alarms[currentTarget] = alarm;
+
+
+                            currentKeywords = new List<string>();
+
+                            m_keywords[currentTarget] = currentKeywords;
+                        }
+                        else if (text[0] != '#' && currentKeywords != null)
+                        {
+                            currentKeywords.Add(text);
+                        }
+                    }
+
+                    sr.Close();
+                }
+            }
+            catch (Exception)
+            {
+                this.State = "키워드 설정을 읽을 수 없습니다.";
+            }
+        }
 
         public void WhenWindowClosing()
         {

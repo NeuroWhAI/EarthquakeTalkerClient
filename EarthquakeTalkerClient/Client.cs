@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
+using System.Threading;
 
 namespace EarthquakeTalkerClient
 {
@@ -31,19 +32,29 @@ namespace EarthquakeTalkerClient
 
         private Guid m_latestGuid = Guid.Empty;
         private bool m_onRunning = false;
+        private Thread m_worker = null;
 
         //################################################################################################
 
         public void Start()
         {
+            Stop();
+
             m_onRunning = true;
 
-            Task.Factory.StartNew(DoJob);
+            m_worker = new Thread(new ThreadStart(DoJob));
+            m_worker.Start();
         }
 
         public void Stop()
         {
             m_onRunning = false;
+
+            if (m_worker != null)
+            {
+                m_worker.Join();
+                m_worker = null;
+            }
         }
 
         private void DoJob()
@@ -69,7 +80,7 @@ namespace EarthquakeTalkerClient
 
                     ProtocolFailed?.Invoke();
 
-                    Task.Delay(2000).Wait();
+                    Thread.Sleep(2000);
                 }
             }
 
@@ -87,7 +98,7 @@ namespace EarthquakeTalkerClient
                     ProtocolFailed?.Invoke();
                 }
 
-                Task.Delay(3000).Wait();
+                Thread.Sleep(3000);
             }
         }
 

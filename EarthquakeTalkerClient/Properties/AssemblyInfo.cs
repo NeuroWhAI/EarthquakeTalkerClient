@@ -12,8 +12,8 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NeuroWhAI")]
 [assembly: AssemblyProduct("EarthquakeTalkerClient")]
-[assembly: AssemblyCopyright("Copyright © NeuroWhAI 2018")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright © NeuroWhAI 2020")]
+[assembly: AssemblyTrademark("NeuroWhAI")]
 [assembly: AssemblyCulture("")]
 
 // ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 

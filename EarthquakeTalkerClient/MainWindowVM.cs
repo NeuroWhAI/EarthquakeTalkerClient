@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace EarthquakeTalkerClient
 {
@@ -15,11 +16,6 @@ namespace EarthquakeTalkerClient
     {
         public MainWindowVM()
         {
-            BindingOperations.EnableCollectionSynchronization(this.Messages, m_lockMsgList);
-
-            this.Messages.CollectionChanged += (s, e) => NotifyPropertyChanged("Messages");
-
-
             try
             {
                 string host, port;
@@ -93,6 +89,8 @@ namespace EarthquakeTalkerClient
 
         //################################################################################################
 
+        public IContext Context { get; set; } = null;
+
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string name)
         {
@@ -109,7 +107,6 @@ namespace EarthquakeTalkerClient
                 NotifyPropertyChanged("Messages");
             }
         }
-        private readonly object m_lockMsgList = new object();
 
         private string m_stateMessage = "Loading";
         public string State
@@ -149,23 +146,26 @@ namespace EarthquakeTalkerClient
 
         private void Client_ProtocolFailed()
         {
-            this.State = "연결 중";
+            Context.BeginInvoke(() =>
+            {
+                this.State = "연결 중";
+            });
         }
 
         private void Client_MessageReceived(Message msg, bool isNew)
         {
-            this.State = "연결됨";
-            this.State2 = "최근 수신 시간 : " + DateTime.Now.ToLongTimeString();
-
-            lock (m_lockMsgList)
+            Context.BeginInvoke(() =>
             {
+                this.State = "연결됨";
+                this.State2 = "최근 수신 시간 : " + DateTime.Now.ToLongTimeString();
+
                 this.Messages.Add(msg);
 
                 if (this.Messages.Count > 32)
                 {
                     this.Messages.RemoveAt(0);
                 }
-            }
+            });
 
 
             if (isNew)
@@ -232,12 +232,15 @@ namespace EarthquakeTalkerClient
 
         private void Client_ProtocolSucceeded()
         {
-            this.State = "연결됨";
+            Context.BeginInvoke(() =>
+            {
+                this.State = "연결됨";
+            });
         }
 
         private void PlayAlarm(MediaPlayer player)
         {
-            player.Dispatcher.Invoke(() =>
+            Context.BeginInvoke(() =>
             {
                 player.Stop();
                 player.Play();

@@ -55,8 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="IContext.cs" />
     <Compile Include="MessageTextToImageConverter.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="WpfContext.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

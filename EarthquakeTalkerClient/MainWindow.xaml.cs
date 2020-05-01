@@ -27,9 +27,10 @@ namespace EarthquakeTalkerClient
 
             
             this.ViewModel = this.DataContext as MainWindowVM;
+            this.ViewModel.Context = new WpfContext(Dispatcher);
 
 
-            m_timer.Interval = TimeSpan.FromMilliseconds(2_000);
+            m_timer.Interval = TimeSpan.FromMilliseconds(1_000);
             m_timer.Tick += Timer_Tick;
             m_timer.Start();
         }

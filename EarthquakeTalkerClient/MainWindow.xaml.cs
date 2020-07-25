@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.IO;
 
 namespace EarthquakeTalkerClient
 {
@@ -47,6 +48,15 @@ namespace EarthquakeTalkerClient
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.ViewModel.Init();
+
+            if (File.Exists("size.txt"))
+            {
+                using (var sr = new StreamReader("size.txt"))
+                {
+                    Width = double.Parse(sr.ReadLine());
+                    Height = double.Parse(sr.ReadLine());
+                }
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -54,6 +64,12 @@ namespace EarthquakeTalkerClient
             m_timer.Stop();
 
             this.ViewModel.WhenWindowClosing();
+
+            using (var sw = new StreamWriter("size.txt"))
+            {
+                sw.WriteLine(ActualWidth);
+                sw.WriteLine(ActualHeight);
+            }
         }
 
         private void Timer_Tick(object sender, EventArgs e)

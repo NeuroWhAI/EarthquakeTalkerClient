@@ -67,7 +67,8 @@ namespace EarthquakeTalkerClient
         private Client m_client = null;
 
         private Dictionary<string, List<string>> m_keywords = new Dictionary<string, List<string>>();
-        private Dictionary<string, MediaPlayer> m_alarms = new Dictionary<string, MediaPlayer>();
+        private Dictionary<string, Uri> m_alarms = new Dictionary<string, Uri>();
+        private MediaPlayer m_player = new MediaPlayer();
 
         //################################################################################################
 
@@ -119,11 +120,7 @@ namespace EarthquakeTalkerClient
                             currentTarget = text.Substring(1);
 
 
-                            var alarm = new MediaPlayer();
-                            alarm.Open(new Uri(Path.Combine("Alarms", currentTarget), UriKind.Relative));
-                            alarm.Stop();
-
-                            m_alarms[currentTarget] = alarm;
+                            m_alarms[currentTarget] = new Uri(Path.Combine("Alarms", currentTarget), UriKind.Relative);
 
 
                             currentKeywords = new List<string>();
@@ -244,12 +241,16 @@ namespace EarthquakeTalkerClient
             });
         }
 
-        private void PlayAlarm(MediaPlayer player)
+        private void PlayAlarm(Uri uri)
         {
             Context.BeginInvoke(() =>
             {
-                player.Stop();
-                player.Play();
+                // Stop and Release memory.
+                m_player.Stop();
+                m_player.Close();
+
+                m_player.Open(uri);
+                m_player.Play();
             });
         }
     }

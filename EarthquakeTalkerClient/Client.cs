@@ -184,11 +184,6 @@ namespace EarthquakeTalkerClient
 
         private bool CheckGlob(Message msg)
         {
-            string[] imageTypes =
-            {
-                ".png", ".jpg", ".bmp", ".jpeg", ".gif", // TODO: More...?
-            };
-
             if (Util.CheckImageUri(msg.Text)
                 && !msg.Text.TrimStart().StartsWith("http"))
             {
